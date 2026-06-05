@@ -8,7 +8,12 @@ const __dirname = path.dirname(__filename);
 
 let db: Database | null = null;
 
-const DB_PATH = path.join(__dirname, '..', 'data', 'bidbond.db');
+const getDbPath = (): string => {
+  if (process.env.NODE_ENV === 'production') {
+    return path.join(__dirname, '..', '..', '..', 'data', 'bidbond.db');
+  }
+  return path.join(__dirname, '..', 'data', 'bidbond.db');
+};
 
 const SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS sections (
@@ -96,7 +101,8 @@ export async function getDb(): Promise<Database> {
 
   const SQL = await initSqlJs();
 
-  const dataDir = path.join(__dirname, '..', 'data');
+  const DB_PATH = getDbPath();
+  const dataDir = path.dirname(DB_PATH);
   if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
   }
@@ -116,6 +122,7 @@ export async function getDb(): Promise<Database> {
 
 export function saveDb(): void {
   if (!db) return;
+  const DB_PATH = getDbPath();
   const data = db.export();
   const buffer = Buffer.from(data);
   fs.writeFileSync(DB_PATH, buffer);

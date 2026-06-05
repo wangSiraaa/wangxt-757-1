@@ -5,12 +5,17 @@ import express, {
 } from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import sectionsRoutes from './routes/sections.js'
 import bondsRoutes from './routes/bonds.js'
 import resultsRoutes from './routes/results.js'
 import refundsRoutes from './routes/refunds.js'
 import vouchersRoutes from './routes/vouchers.js'
 import { getDb, queryOne } from './db.js'
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config()
 
@@ -57,6 +62,14 @@ app.use('/api/stats', async (_req: Request, res: Response) => {
   }
 })
 
+if (process.env.NODE_ENV === 'production') {
+  const staticPath = path.join(__dirname, '..', '..', 'client');
+  app.use(express.static(staticPath));
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(staticPath, 'index.html'));
+  });
+}
+
 app.use((error: Error, _req: Request, res: Response, _next: NextFunction) => {
   res.status(500).json({
     success: false,
@@ -65,10 +78,15 @@ app.use((error: Error, _req: Request, res: Response, _next: NextFunction) => {
 })
 
 app.use((_req: Request, res: Response) => {
-  res.status(404).json({
-    success: false,
-    error: 'API not found',
-  })
+  if (process.env.NODE_ENV === 'production') {
+    const staticPath = path.join(__dirname, '..', '..', 'client');
+    res.sendFile(path.join(staticPath, 'index.html'));
+  } else {
+    res.status(404).json({
+      success: false,
+      error: 'API not found',
+    })
+  }
 })
 
 export default app
