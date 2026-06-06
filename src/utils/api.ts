@@ -39,5 +39,16 @@ export const api = {
     list: () => request<any[]>('/vouchers'),
     create: (data: any) => request<any>('/vouchers', { method: 'POST', body: JSON.stringify(data) }),
   },
+  materials: {
+    list: () => request<any[]>('/materials'),
+    listBySection: (sectionId: number) => request<any[]>(`/materials/section/${sectionId}`),
+    get: (id: number) => request<any>(`/materials/${id}`),
+    create: (data: any) => request<any>('/materials', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: number, data: any) => request<any>(`/materials/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    submit: (id: number) => request<any>(`/materials/${id}/submit`, { method: 'PUT' }),
+    approve: (id: number) => request<any>(`/materials/${id}/approve`, { method: 'PUT' }),
+    reject: (id: number, review_comment: string) => request<any>(`/materials/${id}/reject`, { method: 'PUT', body: JSON.stringify({ review_comment }) }),
+    remove: (id: number) => request<any>(`/materials/${id}`, { method: 'DELETE' }),
+  },
   stats: () => request<any>('/stats'),
 };

@@ -7,6 +7,7 @@ interface AppState {
   results: any[];
   refunds: any[];
   vouchers: any[];
+  materials: any[];
   stats: { sections: number; bonds: number; pendingRefunds: number; vouchers: number };
   loading: boolean;
   error: string | null;
@@ -15,6 +16,8 @@ interface AppState {
   fetchResults: () => Promise<void>;
   fetchRefunds: () => Promise<void>;
   fetchVouchers: () => Promise<void>;
+  fetchMaterials: () => Promise<void>;
+  fetchMaterialsBySection: (sectionId: number) => Promise<void>;
   fetchStats: () => Promise<void>;
   createSection: (data: any) => Promise<{ success: boolean; error?: string }>;
   updateSection: (id: number, data: any) => Promise<{ success: boolean; error?: string }>;
@@ -25,6 +28,12 @@ interface AppState {
   approveRefund: (id: number) => Promise<{ success: boolean; error?: string }>;
   rejectRefund: (id: number, reason: string) => Promise<{ success: boolean; error?: string }>;
   createVoucher: (data: any) => Promise<{ success: boolean; error?: string }>;
+  createMaterial: (data: any) => Promise<{ success: boolean; error?: string }>;
+  updateMaterial: (id: number, data: any) => Promise<{ success: boolean; error?: string }>;
+  submitMaterial: (id: number) => Promise<{ success: boolean; error?: string }>;
+  approveMaterial: (id: number) => Promise<{ success: boolean; error?: string }>;
+  rejectMaterial: (id: number, comment: string) => Promise<{ success: boolean; error?: string }>;
+  deleteMaterial: (id: number) => Promise<{ success: boolean; error?: string }>;
   clearError: () => void;
 }
 
@@ -34,6 +43,7 @@ export const useStore = create<AppState>((set, get) => ({
   results: [],
   refunds: [],
   vouchers: [],
+  materials: [],
   stats: { sections: 0, bonds: 0, pendingRefunds: 0, vouchers: 0 },
   loading: false,
   error: null,
@@ -131,6 +141,56 @@ export const useStore = create<AppState>((set, get) => ({
   createVoucher: async (data) => {
     const res = await api.vouchers.create(data);
     if (res.success) { await get().fetchVouchers(); await get().fetchRefunds(); return { success: true }; }
+    return { success: false, error: res.error };
+  },
+
+  fetchMaterials: async () => {
+    set({ loading: true });
+    const res = await api.materials.list();
+    if (res.success) set({ materials: res.data || [], loading: false });
+    else set({ error: res.error, loading: false });
+  },
+
+  fetchMaterialsBySection: async (sectionId: number) => {
+    set({ loading: true });
+    const res = await api.materials.listBySection(sectionId);
+    if (res.success) set({ materials: res.data || [], loading: false });
+    else set({ error: res.error, loading: false });
+  },
+
+  createMaterial: async (data) => {
+    const res = await api.materials.create(data);
+    if (res.success) { await get().fetchMaterials(); return { success: true }; }
+    return { success: false, error: res.error };
+  },
+
+  updateMaterial: async (id, data) => {
+    const res = await api.materials.update(id, data);
+    if (res.success) { await get().fetchMaterials(); return { success: true }; }
+    return { success: false, error: res.error };
+  },
+
+  submitMaterial: async (id) => {
+    const res = await api.materials.submit(id);
+    if (res.success) { await get().fetchMaterials(); return { success: true }; }
+    return { success: false, error: res.error };
+  },
+
+  approveMaterial: async (id) => {
+    const res = await api.materials.approve(id);
+    if (res.success) { await get().fetchMaterials(); return { success: true }; }
+    return { success: false, error: res.error };
+  },
+
+  rejectMaterial: async (id, comment) => {
+    const res = await api.materials.reject(id, comment);
+    if (res.success) { await get().fetchMaterials(); return { success: true }; }
+    return { success: false, error: res.error };
+  },
+
+  deleteMaterial: async (id) => {
+    const res = await api.materials.remove(id);
+    if (res.success) { await get().fetchMaterials(); return { success: true }; }
     return { success: false, error: res.error };
   },
 }));

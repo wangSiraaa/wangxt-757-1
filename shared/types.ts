@@ -60,6 +60,34 @@ export interface PaymentVoucher {
   section_name?: string;
 }
 
+export interface SupplementaryMaterial {
+  id: number;
+  section_id: number;
+  material_name: string;
+  material_type: string;
+  description: string;
+  file_url?: string;
+  status: 'pending' | 'submitted' | 'approved' | 'rejected';
+  submitted_by?: string;
+  submitted_at?: string;
+  reviewed_by?: string;
+  reviewed_at?: string;
+  review_comment?: string;
+  created_at: string;
+  updated_at: string;
+  section_name?: string;
+  section_code?: string;
+}
+
+export type MaterialStatus = SupplementaryMaterial['status'];
+
+export const MATERIAL_STATUS_MAP: Record<MaterialStatus, string> = {
+  pending: '待提交',
+  submitted: '已提交',
+  approved: '已通过',
+  rejected: '已拒绝',
+};
+
 export type SectionStatus = Section['status'];
 export type BondStatus = Bond['status'];
 export type RefundStatus = RefundApplication['status'];

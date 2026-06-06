@@ -72,6 +72,24 @@ CREATE TABLE IF NOT EXISTS payment_vouchers (
     CHECK(status IN ('issued','confirmed')),
   created_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
 );
+
+CREATE TABLE IF NOT EXISTS supplementary_materials (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  section_id INTEGER NOT NULL REFERENCES sections(id),
+  material_name TEXT NOT NULL,
+  material_type TEXT NOT NULL,
+  description TEXT NOT NULL,
+  file_url TEXT,
+  status TEXT NOT NULL DEFAULT 'pending'
+    CHECK(status IN ('pending','submitted','approved','rejected')),
+  submitted_by TEXT,
+  submitted_at TEXT,
+  reviewed_by TEXT,
+  reviewed_at TEXT,
+  review_comment TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+);
 `;
 
 const SEED_SQL = `
@@ -94,6 +112,11 @@ INSERT OR IGNORE INTO bid_results (id, section_id, winner_name, award_date, cont
 
 INSERT OR IGNORE INTO refund_applications (id, bond_id, section_id, applicant_name, amount, reason, status) VALUES
   (1, 2, 1, '中天建设集团', 500000, '未中标，申请退还保证金', 'approved');
+
+INSERT OR IGNORE INTO supplementary_materials (id, section_id, material_name, material_type, description, status) VALUES
+  (1, 1, '投标保证金缴纳凭证', 'payment', '银行转账回单，金额50万元', 'approved'),
+  (2, 2, '投标资格证明文件', 'qualification', '企业资质证书及项目经理资质', 'submitted'),
+  (3, 4, '技术方案补充说明', 'technical', '详细技术方案及参数说明', 'pending');
 `;
 
 export async function getDb(): Promise<Database> {

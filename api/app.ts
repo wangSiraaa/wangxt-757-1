@@ -12,6 +12,7 @@ import bondsRoutes from './routes/bonds.js'
 import resultsRoutes from './routes/results.js'
 import refundsRoutes from './routes/refunds.js'
 import vouchersRoutes from './routes/vouchers.js'
+import materialsRoutes from './routes/materials.js'
 import { getDb, queryOne } from './db.js'
 
 const __filename = fileURLToPath(import.meta.url);
@@ -30,6 +31,7 @@ app.use('/api/bonds', bondsRoutes)
 app.use('/api/results', resultsRoutes)
 app.use('/api/refunds', refundsRoutes)
 app.use('/api/vouchers', vouchersRoutes)
+app.use('/api/materials', materialsRoutes)
 
 app.use(
   '/api/health',

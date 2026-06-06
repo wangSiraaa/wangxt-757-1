@@ -58,6 +58,18 @@ router.post('/', async (req: Request, res: Response) => {
       }
     }
 
+    const pendingMaterials = queryAll(
+      'SELECT * FROM supplementary_materials WHERE section_id = ? AND status != ?',
+      [(bond as any).section_id, 'approved']
+    );
+    if (pendingMaterials.length > 0) {
+      res.status(400).json({ 
+        success: false, 
+        error: `该标段存在${pendingMaterials.length}份未通过审核的补充材料，请先完成材料审核后再申请退还` 
+      });
+      return;
+    }
+
     run(
       `INSERT INTO refund_applications (bond_id, section_id, applicant_name, amount, reason, status) VALUES (?, ?, ?, ?, ?, 'pending')`,
       [(bond as any).id, (bond as any).section_id, (bond as any).payer_name, (bond as any).amount, reason]
